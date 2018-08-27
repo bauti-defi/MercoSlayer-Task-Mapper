@@ -31,6 +31,7 @@ public class GUI extends Application {
 
 	private boolean isOpen = false;
 
+
 	public GUI(URL fxml) {
 		this(fxml, null);
 	}

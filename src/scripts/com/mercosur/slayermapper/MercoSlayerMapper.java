@@ -21,7 +21,7 @@ public class MercoSlayerMapper extends Script implements Painting {
 
 	private URL fxml;
 
-	public static RSArea monsterArea;
+	private static RSArea areaToPaint;
 
 	@Override
 	public void run() {
@@ -35,14 +35,17 @@ public class MercoSlayerMapper extends Script implements Painting {
 		do {
 			sleep(500);
 		} while (gui.isOpen());
-		this.suspendScript(false, false);
+	}
+
+	public static void paintArea(RSArea rsArea) {
+		areaToPaint = rsArea;
 	}
 
 	@Override
 	public void onPaint(final Graphics graphics) {
-		if (monsterArea != null) {
-			graphics.drawString("testing", 30, 30);
-			for (RSTile tile : monsterArea.getAllTiles()) {
+		if (areaToPaint != null) {
+			graphics.drawString("Painting Area", 30, 30);
+			for (RSTile tile : areaToPaint.getAllTiles()) {
 				graphics.drawPolygon(Projection.getTileBoundsPoly(tile, 0));
 			}
 		}

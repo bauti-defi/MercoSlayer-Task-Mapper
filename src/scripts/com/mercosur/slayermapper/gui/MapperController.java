@@ -4,8 +4,10 @@ import com.allatori.annotations.DoNotRename;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.tribot.api.General;
 import org.tribot.api2007.Skills;
 import org.tribot.api2007.types.RSArea;
+import scripts.com.mercosur.slayermapper.MercoSlayerMapper;
 import scripts.com.mercosur.slayermapper.models.Task;
 import scripts.com.mercosur.slayermapper.models.items.Item;
 import scripts.com.mercosur.slayermapper.models.items.ItemProperty;
@@ -14,6 +16,7 @@ import scripts.com.mercosur.slayermapper.models.items.consumable.Potion;
 import scripts.com.mercosur.slayermapper.models.npcs.AttackStyle;
 import scripts.com.mercosur.slayermapper.models.npcs.monster.FinalBlowMonsterMechanic;
 import scripts.com.mercosur.slayermapper.models.npcs.monster.Monster;
+import scripts.com.mercosur.slayermapper.util.MonsterAreaGenerator;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -174,14 +177,28 @@ public class MapperController extends AbstractGUIController {
 		}
 	}
 
+	private MonsterAreaGenerator areaGenerator;
+	private Thread generatorThread;
+
 	@FXML
 	@DoNotRename
 	public void generateMonsterArea() {
-		if (!isGeneratingArea()) {
+		if (monsterToAddName.getText().isEmpty()) {
+			return;
+		} else if (!isGeneratingArea()) {
+			//start generating
 			areaGeneratorLabel.setText("On");
-
+			areaGenerator = new MonsterAreaGenerator(monsterToAddName.getText());
+			generatorThread = new Thread(areaGenerator);
+			generatorThread.start();
 		} else {
 			//stop generating
+			areaGeneratorLabel.setText("Off");
+			areaGenerator.SCAN.set(false);
+			do {
+				General.sleep(100);
+			} while (generatorThread.isAlive());
+			MercoSlayerMapper.paintArea(areaGenerator.getMonsterToAddArea());
 		}
 	}
 
