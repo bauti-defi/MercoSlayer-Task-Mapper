@@ -8,8 +8,8 @@ public class Item extends AbstractItem {
 
 	private boolean canEquip;
 
-	public Item(final String name, final boolean stackable, final boolean canEquip, final ItemProperty... properties) {
-		super(name, stackable);
+	public Item(final String name, final boolean mutatableName, final boolean stackable, final boolean canEquip, final ItemProperty... properties) {
+		super(name, mutatableName, stackable);
 		this.canEquip = canEquip;
 		this.properties = properties;
 	}
@@ -35,5 +35,4 @@ public class Item extends AbstractItem {
 		}
 		return stringBuilder.toString();
 	}
-
 }
