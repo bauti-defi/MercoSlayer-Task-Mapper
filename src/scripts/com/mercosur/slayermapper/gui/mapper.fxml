@@ -104,7 +104,7 @@
                                                                             <children>
                                                                                 <ListView fx:id="taskMonsterList"
                                                                                           layoutX="86.0" layoutY="101.0"
-                                                                                          onMouseClicked="#updateTaskMonsterList"
+                                                                                          onMouseClicked="#displaySelectedMonsterForTask"
                                                                                           prefHeight="481.0"
                                                                                           prefWidth="358.0"
                                                                                           AnchorPane.bottomAnchor="0.0"
@@ -164,7 +164,8 @@
                                                                           prefHeight="149.0" prefWidth="200.0"/>
                                                                 <Label fx:id="areaGeneratorLabel" layoutX="108.0"
                                                                        layoutY="279.0" text="Off"/>
-                                                                <ComboBox layoutX="225.0" layoutY="175.0"
+                                                                <ComboBox fx:id="monsterToAddSlayerRegion"
+                                                                          layoutX="225.0" layoutY="175.0"
                                                                           prefWidth="150.0" promptText="Region"/>
                                                             </children>
                                                         </AnchorPane>
@@ -307,7 +308,8 @@
                                                                                 mnemonicParsing="false"
                                                                                 onAction="#deleteItem"
                                                                                 text="Delete Item"/>
-                                                                        <CheckBox layoutX="72.0" layoutY="75.0"
+                                                                        <CheckBox fx:id="itemToAddNameIsMutatable"
+                                                                                  layoutX="72.0" layoutY="75.0"
                                                                                   mnemonicParsing="false"
                                                                                   text="Mutatable Name"/>
                                                                     </children>

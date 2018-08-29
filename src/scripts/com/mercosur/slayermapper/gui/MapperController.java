@@ -38,7 +38,7 @@ public class MapperController extends AbstractGUIController {
 
 	@FXML
 	@DoNotRename
-	private ListView<Monster> taskMonsterList;
+	private ListView<MonsterCheckBox> taskMonsterList;
 
 	@FXML
 	@DoNotRename
@@ -135,6 +135,7 @@ public class MapperController extends AbstractGUIController {
 			return;
 		}
 		taskList.getItems().add(new Task(taskToAddName.getText()));
+		taskToAddName.clear();
 	}
 
 	@FXML
@@ -144,6 +145,7 @@ public class MapperController extends AbstractGUIController {
 			return;
 		}
 		taskList.getItems().remove(taskList.getSelectionModel().getSelectedIndex());
+		taskList.getSelectionModel().clearSelection();
 	}
 
 	@FXML
@@ -153,19 +155,32 @@ public class MapperController extends AbstractGUIController {
 			return;
 		}
 		final Task selectedTask = taskList.getSelectionModel().getSelectedItem();
-		taskMonsterList.getSelectionModel().clearSelection();
-		for (Monster monster : selectedTask.getMonsters()) {
-			taskMonsterList.getSelectionModel().select(monster);
-		}
+		taskMonsterList.getItems().stream().forEach(monsterCheckBox -> {
+			monsterCheckBox.setSelected(false);
+			monsterCheckBox.setOnAction(e -> {
+				if (e.getSource() instanceof MonsterCheckBox) {
+					final MonsterCheckBox actedCheckBox = (MonsterCheckBox) e.getSource();
+					if (actedCheckBox.isSelected()) {
+						selectedTask.addMonster(actedCheckBox.getMonster());
+					} else {
+						selectedTask.removeMonster(actedCheckBox.getMonster());
+					}
+				}
+			});
+		});
+		taskMonsterList.getItems().stream().filter(monsterCheckBox -> selectedTask.getMonsters().contains(monsterCheckBox.getMonster()))
+				.forEach(monsterCheckBox -> monsterCheckBox.setSelected(true));
 	}
 
 	@FXML
 	@DoNotRename
-	public void updateTaskMonsterList() {
-		if (taskList.getSelectionModel().isEmpty() || taskMonsterList.getSelectionModel().isEmpty()) {
+	public void displaySelectedMonsterForTask() {
+		if (taskList.getSelectionModel().isEmpty()) {
 			return;
 		}
-		taskList.getSelectionModel().getSelectedItem().setMonsters(taskMonsterList.getItems().stream().collect(Collectors.toList()));
+		taskList.getSelectionModel().getSelectedItem().setMonsters(taskMonsterList.getItems().stream()
+				.filter(monsterCheckBox -> monsterCheckBox.isSelected())
+				.map(MonsterCheckBox::getMonster).collect(Collectors.toList()));
 	}
 
 	private boolean isGeneratingArea() {
@@ -201,37 +216,53 @@ public class MapperController extends AbstractGUIController {
 	@DoNotRename
 	public void addMonster() {
 		final String name = monsterToAddName.getText();
-		if (name.isEmpty()) {
+		if (name.isEmpty() || areaGenerator == null || areaGenerator.getMonsterToAddArea() == null) {
 			return;
 		}
 
 		final int level = Integer.parseInt(monsterToAddLevel.getText());
 		final ItemProperty[] itemProperties = monsterToAddRequiredItemProperties.getSelectionModel().getSelectedItems().stream().toArray(ItemProperty[]::new);
-		final RSArea area = null;
+		final RSArea area = areaGenerator.getMonsterToAddArea();
 		final FinalBlowMonsterMechanic finalBlowMonsterMechanic;
 		final SlayerRegion slayerRegion;
 		final AttackStyle[] attackStyles;
-		List<AttackStyle> styles = new ArrayList<>();
+		final List<AttackStyle> styles = new ArrayList<>();
+
 		if (monsterToAddMelees.isSelected()) {
 			styles.add(AttackStyle.MELEE);
+			monsterToAddMelees.setSelected(false);
 		}
 		if (monsterToAddMages.isSelected()) {
 			styles.add(AttackStyle.MAGIC);
+			monsterToAddMages.setSelected(false);
 		}
 		if (monsterToAddRanges.isSelected()) {
 			styles.add(AttackStyle.RANGE);
+			monsterToAddRanges.setSelected(false);
 		}
+
 		finalBlowMonsterMechanic = monsterToAddFinalBlowMechanic.getValue();
 		slayerRegion = monsterToAddSlayerRegion.getValue();
 		attackStyles = styles.stream().toArray(AttackStyle[]::new);
 
-		monsterList.getItems().add(new Monster(name, level, itemProperties, area, slayerRegion, finalBlowMonsterMechanic, attackStyles));
+		final Monster newMonster = new Monster(name, level, itemProperties, area, slayerRegion, finalBlowMonsterMechanic, attackStyles);
+
+		monsterList.getItems().add(newMonster);
+		taskMonsterList.getItems().add(new MonsterCheckBox(newMonster));
+
+		monsterToAddName.clear();
+		monsterToAddLevel.clear();
+		monsterToAddRequiredItemProperties.getSelectionModel().clearSelection();
 	}
 
 	@FXML
 	@DoNotRename
 	public void deleteMonster() {
-
+		if (monsterList.getSelectionModel().isEmpty()) {
+			return;
+		}
+		taskMonsterList.getItems().remove(monsterList.getItems().remove(monsterList.getSelectionModel().getSelectedIndex()));
+		monsterList.getSelectionModel().clearSelection();
 	}
 
 	@FXML
@@ -316,6 +347,7 @@ public class MapperController extends AbstractGUIController {
 		taskMonsterList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		monsterToAddRequiredItemProperties.setItems(FXCollections.observableArrayList(ItemProperty.values()));
+		monsterToAddRequiredItemProperties.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		monsterToAddFinalBlowMechanic.setItems(FXCollections.observableArrayList(FinalBlowMonsterMechanic.values()));
 		monsterToAddSlayerRegion.setItems(FXCollections.observableArrayList(SlayerRegion.values()));
 	}
