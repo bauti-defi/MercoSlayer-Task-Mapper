@@ -58,10 +58,6 @@ public class MapperController extends AbstractGUIController {
 
 	@FXML
 	@DoNotRename
-	private CheckBox monsterToAddHasMechanic;
-
-	@FXML
-	@DoNotRename
 	private ComboBox<FinalBlowMonsterMechanic> monsterToAddFinalBlowMechanic;
 
 	@FXML
@@ -176,16 +172,6 @@ public class MapperController extends AbstractGUIController {
 		return areaGeneratorLabel.getText().equalsIgnoreCase("On");
 	}
 
-	@FXML
-	@DoNotRename
-	public void toggleMonsterMechanicComboBox() {
-		if (monsterToAddHasMechanic.isSelected()) {
-			monsterToAddFinalBlowMechanic.setDisable(false);
-		} else {
-			monsterToAddFinalBlowMechanic.setDisable(true);
-		}
-	}
-
 	private MonsterAreaGenerator areaGenerator;
 	private Thread generatorThread;
 
@@ -225,11 +211,6 @@ public class MapperController extends AbstractGUIController {
 		final FinalBlowMonsterMechanic finalBlowMonsterMechanic;
 		final SlayerRegion slayerRegion;
 		final AttackStyle[] attackStyles;
-		if (monsterToAddHasMechanic.isSelected()) {
-			finalBlowMonsterMechanic = monsterToAddFinalBlowMechanic.getValue();
-		} else {
-			finalBlowMonsterMechanic = FinalBlowMonsterMechanic.NONE;
-		}
 		List<AttackStyle> styles = new ArrayList<>();
 		if (monsterToAddMelees.isSelected()) {
 			styles.add(AttackStyle.MELEE);
@@ -240,6 +221,7 @@ public class MapperController extends AbstractGUIController {
 		if (monsterToAddRanges.isSelected()) {
 			styles.add(AttackStyle.RANGE);
 		}
+		finalBlowMonsterMechanic = monsterToAddFinalBlowMechanic.getValue();
 		slayerRegion = monsterToAddSlayerRegion.getValue();
 		attackStyles = styles.stream().toArray(AttackStyle[]::new);
 
