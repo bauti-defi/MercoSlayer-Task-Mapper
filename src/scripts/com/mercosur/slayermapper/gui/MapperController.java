@@ -16,6 +16,7 @@ import scripts.com.mercosur.slayermapper.models.items.consumable.Potion;
 import scripts.com.mercosur.slayermapper.models.npcs.AttackStyle;
 import scripts.com.mercosur.slayermapper.models.npcs.monster.FinalBlowMonsterMechanic;
 import scripts.com.mercosur.slayermapper.models.npcs.monster.Monster;
+import scripts.com.mercosur.slayermapper.models.travel.SlayerRegion;
 import scripts.com.mercosur.slayermapper.util.MonsterAreaGenerator;
 
 import java.net.URL;
@@ -62,6 +63,10 @@ public class MapperController extends AbstractGUIController {
 	@FXML
 	@DoNotRename
 	private ComboBox<FinalBlowMonsterMechanic> monsterToAddFinalBlowMechanic;
+
+	@FXML
+	@DoNotRename
+	private ComboBox<SlayerRegion> monsterToAddSlayerRegion;
 
 	@FXML
 	@DoNotRename
@@ -114,6 +119,10 @@ public class MapperController extends AbstractGUIController {
 	@FXML
 	@DoNotRename
 	private CheckBox itemToAddIsStackable;
+
+	@FXML
+	@DoNotRename
+	private CheckBox itemToAddNameIsMutatable;
 
 	@FXML
 	@DoNotRename
@@ -214,11 +223,12 @@ public class MapperController extends AbstractGUIController {
 		final ItemProperty[] itemProperties = monsterToAddRequiredItemProperties.getSelectionModel().getSelectedItems().stream().toArray(ItemProperty[]::new);
 		final RSArea area = null;
 		final FinalBlowMonsterMechanic finalBlowMonsterMechanic;
+		final SlayerRegion slayerRegion;
 		final AttackStyle[] attackStyles;
 		if (monsterToAddHasMechanic.isSelected()) {
 			finalBlowMonsterMechanic = monsterToAddFinalBlowMechanic.getValue();
 		} else {
-			finalBlowMonsterMechanic = null;
+			finalBlowMonsterMechanic = FinalBlowMonsterMechanic.NONE;
 		}
 		List<AttackStyle> styles = new ArrayList<>();
 		if (monsterToAddMelees.isSelected()) {
@@ -230,9 +240,10 @@ public class MapperController extends AbstractGUIController {
 		if (monsterToAddRanges.isSelected()) {
 			styles.add(AttackStyle.RANGE);
 		}
+		slayerRegion = monsterToAddSlayerRegion.getValue();
 		attackStyles = styles.stream().toArray(AttackStyle[]::new);
 
-		monsterList.getItems().add(new Monster(name, level, itemProperties, area, finalBlowMonsterMechanic, attackStyles));
+		monsterList.getItems().add(new Monster(name, level, itemProperties, area, slayerRegion, finalBlowMonsterMechanic, attackStyles));
 	}
 
 	@FXML
@@ -288,12 +299,13 @@ public class MapperController extends AbstractGUIController {
 	public void addItem() {
 		final String name = itemToAddName.getText();
 		final boolean stackable = itemToAddIsStackable.isSelected();
+		final boolean mutatableName = itemToAddNameIsMutatable.isSelected();
 		final boolean equipable = itemToAddIsEquipable.isSelected();
 		final ItemProperty[] properties = itemToAddProperties.getSelectionModel().getSelectedItems().stream().toArray(ItemProperty[]::new);
 		if (name.isEmpty() || itemList.getItems().stream().anyMatch(item -> item.getName().equalsIgnoreCase(name))) {
 			return;
 		}
-		itemList.getItems().add(new Item(name, stackable, equipable, properties));
+		itemList.getItems().add(new Item(name, mutatableName, stackable, equipable, properties));
 		itemToAddName.clear();
 		itemToAddIsStackable.setSelected(false);
 		itemToAddIsEquipable.setSelected(false);
@@ -323,5 +335,6 @@ public class MapperController extends AbstractGUIController {
 
 		monsterToAddRequiredItemProperties.setItems(FXCollections.observableArrayList(ItemProperty.values()));
 		monsterToAddFinalBlowMechanic.setItems(FXCollections.observableArrayList(FinalBlowMonsterMechanic.values()));
+		monsterToAddSlayerRegion.setItems(FXCollections.observableArrayList(SlayerRegion.values()));
 	}
 }
