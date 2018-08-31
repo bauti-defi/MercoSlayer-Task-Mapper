@@ -167,8 +167,8 @@ public class GUI extends Application {
 		Platform.runLater(() -> stage.close());
 	}
 
-	public boolean isOpen() {
-		return isOpen;
+	public boolean isShowing() {
+		return stage.isShowing();
 	}
 
 	private void waitForInit() {

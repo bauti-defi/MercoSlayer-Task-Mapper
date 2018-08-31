@@ -4,7 +4,6 @@ import com.allatori.annotations.DoNotRename;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import org.tribot.api.General;
 import org.tribot.api2007.Skills;
 import org.tribot.api2007.types.RSArea;
 import scripts.com.mercosur.slayermapper.MercoSlayerMapper;
@@ -187,9 +186,6 @@ public class MapperController extends AbstractGUIController {
 		return areaGeneratorLabel.getText().equalsIgnoreCase("On");
 	}
 
-	private MonsterAreaGenerator areaGenerator;
-	private Thread generatorThread;
-
 	@FXML
 	@DoNotRename
 	public void generateMonsterArea() {
@@ -198,17 +194,10 @@ public class MapperController extends AbstractGUIController {
 		} else if (!isGeneratingArea()) {
 			//start generating
 			areaGeneratorLabel.setText("On");
-			areaGenerator = new MonsterAreaGenerator(monsterToAddName.getText());
-			generatorThread = new Thread(areaGenerator);
-			generatorThread.start();
+			MercoSlayerMapper.monsterAreaGenerator = new MonsterAreaGenerator(monsterToAddName.getText());
 		} else {
 			//stop generating
 			areaGeneratorLabel.setText("Off");
-			areaGenerator.SCAN.set(false);
-			do {
-				General.sleep(100);
-			} while (generatorThread.isAlive());
-			MercoSlayerMapper.paintArea(areaGenerator.getMonsterToAddArea());
 		}
 	}
 
@@ -216,13 +205,13 @@ public class MapperController extends AbstractGUIController {
 	@DoNotRename
 	public void addMonster() {
 		final String name = monsterToAddName.getText();
-		if (name.isEmpty() || areaGenerator == null || areaGenerator.getMonsterToAddArea() == null) {
+		if (name.isEmpty() || MercoSlayerMapper.monsterAreaGenerator == null || MercoSlayerMapper.monsterAreaGenerator.getMonsterToAddArea() == null) {
 			return;
 		}
 
 		final int level = Integer.parseInt(monsterToAddLevel.getText());
 		final ItemProperty[] itemProperties = monsterToAddRequiredItemProperties.getSelectionModel().getSelectedItems().stream().toArray(ItemProperty[]::new);
-		final RSArea area = areaGenerator.getMonsterToAddArea();
+		final RSArea area = MercoSlayerMapper.monsterAreaGenerator.getMonsterToAddArea();
 		final FinalBlowMonsterMechanic finalBlowMonsterMechanic;
 		final SlayerRegion slayerRegion;
 		final AttackStyle[] attackStyles;
@@ -250,6 +239,7 @@ public class MapperController extends AbstractGUIController {
 		monsterList.getItems().add(newMonster);
 		taskMonsterList.getItems().add(new MonsterCheckBox(newMonster));
 
+		MercoSlayerMapper.monsterAreaGenerator = null;
 		monsterToAddName.clear();
 		monsterToAddLevel.clear();
 		monsterToAddRequiredItemProperties.getSelectionModel().clearSelection();
